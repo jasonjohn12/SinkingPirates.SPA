@@ -1,8 +1,18 @@
 import React, { useState } from "react";
 import "antd/dist/antd.css";
-import { Table, Input, InputNumber, Popconfirm, Form, Typography } from "antd";
+import {
+  Button,
+  Table,
+  Input,
+  Tag,
+  InputNumber,
+  Popconfirm,
+  Form,
+  Typography,
+} from "antd";
 import { Link } from "react-router-dom";
 import Faker from "faker";
+import { format, compareAsc } from "date-fns";
 const originData = [];
 const entries = [];
 for (let i = 1; i < 5; i++) {
@@ -10,6 +20,7 @@ for (let i = 1; i < 5; i++) {
     key: i.toString(),
     dateAdded: Faker.date.past().toString(),
     note: Faker.lorem.sentence(),
+    contactedParent: Faker.random.boolean(),
   });
 }
 
@@ -18,10 +29,14 @@ for (let i = 0; i < 100; i++) {
     key: i.toString(),
     name: Faker.name.findName(),
     grade: Math.floor(Math.random() * 100) + 1,
-    recentContactdate: Faker.date.past().toString(),
+    recentContactdate: format(Faker.date.past(), "MM/dd/yyyy"),
     entries,
   });
 }
+
+const handleAdd = () => {
+  console.log("ADD");
+};
 
 const EditableCell = ({
   editing,
@@ -34,6 +49,7 @@ const EditableCell = ({
   ...restProps
 }) => {
   const inputNode = inputType === "number" ? <InputNumber /> : <Input />;
+  console.log("EDITING");
   return (
     <td {...restProps}>
       {editing ? (
@@ -123,9 +139,16 @@ const Dashboard = () => {
       dataIndex: "grade",
       width: "15%",
       editable: true,
+      render: (grade) => (
+        <span>
+          <Tag color={grade < 60 ? "volcano" : "geekblue"} key={grade}>
+            {grade}
+          </Tag>
+        </span>
+      ),
     },
     {
-      title: "Last Successful Contact Date",
+      title: "Recent Attempted Contact",
       dataIndex: "recentContactdate",
       width: "40%",
       editable: true,
@@ -160,11 +183,21 @@ const Dashboard = () => {
         );
       },
     },
+    {
+      title: "Parent Responded",
+      dataIndex: "true",
+      width: "15%",
+      render: (_, record) => <span>{"True"}</span>,
+    },
   ];
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
     }
+
+    const handleAdd = () => {
+      console.log("ADD");
+    };
 
     return {
       ...col,
@@ -177,9 +210,25 @@ const Dashboard = () => {
       }),
     };
   });
+
+  const components = {
+    body: {
+      // row: EditableCell,
+      cell: EditableCell,
+    },
+  };
   return (
     <div className="container mt-5">
       <Form form={form} component={false}>
+        <Button
+          onClick={handleAdd}
+          type="primary"
+          style={{
+            marginBottom: 16,
+          }}
+        >
+          Add a row
+        </Button>
         <Table
           components={{
             body: {
@@ -187,6 +236,7 @@ const Dashboard = () => {
             },
           }}
           bordered
+          components={components}
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"
