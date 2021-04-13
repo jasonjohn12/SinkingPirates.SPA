@@ -5,7 +5,7 @@ const Home = () => {
   return (
     <div className="container mt-5">
       <div style={{ textAlign: "center" }}>
-        <h1>Find your match</h1>
+        <h1>Hello Teachers!</h1>
         <p className="lead">
           Come on in to view your matches... all you need to do is sign up!
         </p>
